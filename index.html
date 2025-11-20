@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌱 Plant Health Analyzer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌱 Plant Health Analyzer</h1>
+            <p>Upload a photo or use your camera to analyze your plant's health</p>
+        </header>
+
+        <div class="upload-section">
+            <div class="upload-box" id="uploadBox">
+                <div class="upload-content">
+                    <div class="upload-icon">📷</div>
+                    <h3>Choose Analysis Method</h3>
+                    <div class="button-group">
+                        <button id="cameraBtn" class="btn primary">📸 Use Camera</button>
+                        <button id="uploadBtn" class="btn secondary">📁 Upload Photo</button>
+                    </div>
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                </div>
+            </div>
+
+            <div class="camera-section" id="cameraSection" style="display: none;">
+                <video id="cameraView" autoplay playsinline></video>
+                <div class="camera-controls">
+                    <button id="captureBtn" class="btn primary">📸 Capture Photo</button>
+                    <button id="cancelCameraBtn" class="btn secondary">❌ Cancel</button>
+                </div>
+                <canvas id="photoCanvas" style="display: none;"></canvas>
+            </div>
+        </div>
+
+        <div class="preview-section" id="previewSection" style="display: none;">
+            <h3>Your Plant Photo</h3>
+            <img id="previewImage" src="" alt="Plant preview">
+            <div class="preview-controls">
+                <button id="analyzeBtn" class="btn primary">🔍 Analyze Plant</button>
+                <button id="newPhotoBtn" class="btn secondary">🔄 New Photo</button>
+            </div>
+        </div>
+
+        <div class="loading-section" id="loadingSection" style="display: none;">
+            <div class="spinner"></div>
+            <h3>Analyzing Plant Health...</h3>
+            <p>This may take a few seconds</p>
+        </div>
+
+        <div class="results-section" id="resultsSection" style="display: none;">
+            <!-- Results will be populated here by JavaScript -->
+        </div>
+
+        <div class="error-section" id="errorSection" style="display: none;">
+            <!-- Error messages will be shown here -->
+        </div>
+    </div>
+
+    <script src="plant-analyzer.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
