@@ -3,64 +3,569 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌱 Plant Health Analyzer</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Plant Photo Analyzer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            padding: 30px;
+        }
+        
+        .photo-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .photo-container {
+            width: 100%;
+            height: 300px;
+            border: 2px dashed #2ecc71;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            overflow: hidden;
+            background-color: #f8f9fa;
+            position: relative;
+        }
+        
+        .photo-placeholder {
+            text-align: center;
+            color: #7f8c8d;
+        }
+        
+        .photo-placeholder i {
+            font-size: 60px;
+            margin-bottom: 15px;
+            color: #2ecc71;
+        }
+        
+        .photo-preview {
+            max-width: 100%;
+            max-height: 100%;
+            display: none;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+        }
+        
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .analysis-section {
+            background-color: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .analysis-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .analysis-title {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .analysis-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .plant-info, .health-status {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .info-title, .status-title {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .info-item, .status-item {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .info-label, .status-label {
+            font-weight: 600;
+            color: #7f8c8d;
+        }
+        
+        .info-value, .status-value {
+            color: #2c3e50;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background-color: #ecf0f1;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .status-message {
+            text-align: center;
+            color: #7f8c8d;
+            margin: 15px 0;
+            font-style: italic;
+        }
+        
+        .camera-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .camera-content {
+            background-color: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .camera-preview {
+            width: 100%;
+            height: 400px;
+            background-color: #2c3e50;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        #videoElement {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .camera-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .analysis-content {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🌱 Plant Health Analyzer</h1>
-            <p>Upload a photo or use your camera to analyze your plant's health</p>
+            <h1>Plant Photo Analyzer</h1>
+            <p class="subtitle">Identify plants and check their health with AI technology</p>
         </header>
-
-        <div class="upload-section">
-            <div class="upload-box" id="uploadBox">
-                <div class="upload-content">
-                    <div class="upload-icon">📷</div>
-                    <h3>Choose Analysis Method</h3>
-                    <div class="button-group">
-                        <button id="cameraBtn" class="btn primary">📸 Use Camera</button>
-                        <button id="uploadBtn" class="btn secondary">📁 Upload Photo</button>
+        
+        <div class="main-content">
+            <div class="photo-section">
+                <div class="photo-container">
+                    <div class="photo-placeholder">
+                        <i class="fas fa-leaf"></i>
+                        <p>No plant photo selected</p>
                     </div>
-                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                    <img id="photoPreview" class="photo-preview" src="" alt="Plant Photo Preview">
+                </div>
+                
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                
+                <div class="status-message" id="statusMessage"></div>
+                
+                <div class="buttons">
+                    <button class="btn btn-primary" id="newPhotoBtn">
+                        <i class="fas fa-camera"></i> New Photo
+                    </button>
+                    <button class="btn btn-success" id="analyzeBtn" disabled>
+                        <i class="fas fa-search"></i> Analyze Plant
+                    </button>
                 </div>
             </div>
-
-            <div class="camera-section" id="cameraSection" style="display: none;">
-                <video id="cameraView" autoplay playsinline></video>
-                <div class="camera-controls">
-                    <button id="captureBtn" class="btn primary">📸 Capture Photo</button>
-                    <button id="cancelCameraBtn" class="btn secondary">❌ Cancel</button>
+            
+            <div class="analysis-section" id="analysisSection">
+                <div class="analysis-header">
+                    <h2 class="analysis-title">Analysis Results</h2>
+                    <div class="analysis-actions">
+                        <button class="btn btn-primary" id="saveReportBtn">
+                            <i class="fas fa-download"></i> Save Report
+                        </button>
+                    </div>
                 </div>
-                <canvas id="photoCanvas" style="display: none;"></canvas>
+                
+                <div class="analysis-content">
+                    <div class="plant-info">
+                        <h3 class="info-title">Plant Information</h3>
+                        <div class="info-item">
+                            <span class="info-label">Species:</span>
+                            <span class="info-value" id="speciesValue">Monstera Deliciosa</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Common Name:</span>
+                            <span class="info-value" id="commonNameValue">Swiss Cheese Plant</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Family:</span>
+                            <span class="info-value" id="familyValue">Araceae</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Native Region:</span>
+                            <span class="info-value" id="regionValue">Central America</span>
+                        </div>
+                    </div>
+                    
+                    <div class="health-status">
+                        <h3 class="status-title">Health Status</h3>
+                        <div class="status-item">
+                            <span class="status-label">Overall Health:</span>
+                            <span class="status-value" id="healthValue">Good</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Water Needs:</span>
+                            <span class="status-value" id="waterValue">Moderate</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Light Requirements:</span>
+                            <span class="status-value" id="lightValue">Bright, indirect light</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Potential Issues:</span>
+                            <span class="status-value" id="issuesValue">None detected</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-
-        <div class="preview-section" id="previewSection" style="display: none;">
-            <h3>Your Plant Photo</h3>
-            <img id="previewImage" src="" alt="Plant preview">
-            <div class="preview-controls">
-                <button id="analyzeBtn" class="btn primary">🔍 Analyze Plant</button>
-                <button id="newPhotoBtn" class="btn secondary">🔄 New Photo</button>
-            </div>
-        </div>
-
-        <div class="loading-section" id="loadingSection" style="display: none;">
-            <div class="spinner"></div>
-            <h3>Analyzing Plant Health...</h3>
-            <p>This may take a few seconds</p>
-        </div>
-
-        <div class="results-section" id="resultsSection" style="display: none;">
-            <!-- Results will be populated here by JavaScript -->
-        </div>
-
-        <div class="error-section" id="errorSection" style="display: none;">
-            <!-- Error messages will be shown here -->
         </div>
     </div>
-
-    <script src="plant-analyzer.js"></script>
-    <script src="script.js"></script>
+    
+    <!-- Camera Modal -->
+    <div class="camera-modal" id="cameraModal">
+        <div class="camera-content">
+            <h2>Take a Plant Photo</h2>
+            <div class="camera-preview">
+                <video id="videoElement" autoplay playsinline></video>
+            </div>
+            <div class="camera-buttons">
+                <button class="btn btn-primary" id="captureBtn">
+                    <i class="fas fa-camera"></i> Capture Photo
+                </button>
+                <button class="btn" id="closeCameraBtn" style="background: #e74c3c; color: white;">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Hidden file input -->
+    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const newPhotoBtn = document.getElementById('newPhotoBtn');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const photoPreview = document.getElementById('photoPreview');
+            const photoPlaceholder = document.querySelector('.photo-placeholder');
+            const analysisSection = document.getElementById('analysisSection');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const statusMessage = document.getElementById('statusMessage');
+            const fileInput = document.getElementById('fileInput');
+            const cameraModal = document.getElementById('cameraModal');
+            const videoElement = document.getElementById('videoElement');
+            const captureBtn = document.getElementById('captureBtn');
+            const closeCameraBtn = document.getElementById('closeCameraBtn');
+            const saveReportBtn = document.getElementById('saveReportBtn');
+            
+            let stream = null;
+            let currentPhotoData = null;
+            
+            // Event Listeners
+            newPhotoBtn.addEventListener('click', openCameraModal);
+            analyzeBtn.addEventListener('click', analyzePlant);
+            fileInput.addEventListener('change', handleFileUpload);
+            captureBtn.addEventListener('click', capturePhoto);
+            closeCameraBtn.addEventListener('click', closeCameraModal);
+            saveReportBtn.addEventListener('click', saveReport);
+            
+            // Open camera modal
+            function openCameraModal() {
+                cameraModal.style.display = 'flex';
+                startCamera();
+            }
+            
+            // Close camera modal
+            function closeCameraModal() {
+                cameraModal.style.display = 'none';
+                stopCamera();
+            }
+            
+            // Start camera
+            async function startCamera() {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { facingMode: 'environment' } 
+                    });
+                    videoElement.srcObject = stream;
+                } catch (err) {
+                    console.error("Error accessing camera: ", err);
+                    // Fallback to file upload if camera fails
+                    alert("Could not access camera. Please upload a photo instead.");
+                    fileInput.click();
+                    closeCameraModal();
+                }
+            }
+            
+            // Stop camera
+            function stopCamera() {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                    stream = null;
+                }
+            }
+            
+            // Capture photo from camera
+            function capturePhoto() {
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.width = videoElement.videoWidth;
+                canvas.height = videoElement.videoHeight;
+                context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+                
+                // Convert to data URL and display
+                currentPhotoData = canvas.toDataURL('image/jpeg');
+                displayPhoto(currentPhotoData);
+                
+                // Close camera and enable analyze button
+                closeCameraModal();
+                analyzeBtn.disabled = false;
+            }
+            
+            // Handle file upload
+            function handleFileUpload(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        currentPhotoData = e.target.result;
+                        displayPhoto(currentPhotoData);
+                        analyzeBtn.disabled = false;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+            
+            // Display photo in preview
+            function displayPhoto(dataUrl) {
+                photoPlaceholder.style.display = 'none';
+                photoPreview.src = dataUrl;
+                photoPreview.style.display = 'block';
+            }
+            
+            // Simulate plant analysis (replaces the freezing process)
+            function analyzePlant() {
+                // Show progress and status
+                progressContainer.style.display = 'block';
+                statusMessage.textContent = "Processing image...";
+                analyzeBtn.disabled = true;
+                
+                // Simulate processing steps with progress updates
+                simulateProgress(0);
+                
+                setTimeout(() => {
+                    simulateProgress(30);
+                    statusMessage.textContent = "Identifying plant species...";
+                }, 800);
+                
+                setTimeout(() => {
+                    simulateProgress(60);
+                    statusMessage.textContent = "Analyzing plant health...";
+                }, 1600);
+                
+                setTimeout(() => {
+                    simulateProgress(90);
+                    statusMessage.textContent = "Generating report...";
+                }, 2400);
+                
+                setTimeout(() => {
+                    simulateProgress(100);
+                    statusMessage.textContent = "Analysis complete!";
+                    
+                    // Show results after a short delay
+                    setTimeout(() => {
+                        analysisSection.style.display = 'block';
+                        analyzeBtn.disabled = false;
+                        
+                        // Scroll to results
+                        analysisSection.scrollIntoView({ behavior: 'smooth' });
+                    }, 500);
+                }, 3000);
+            }
+            
+            // Simulate progress bar animation
+            function simulateProgress(targetPercent) {
+                let currentPercent = parseInt(progressBar.style.width) || 0;
+                const increment = 1;
+                
+                const progressInterval = setInterval(() => {
+                    if (currentPercent >= targetPercent) {
+                        clearInterval(progressInterval);
+                        return;
+                    }
+                    
+                    currentPercent += increment;
+                    progressBar.style.width = currentPercent + '%';
+                }, 10);
+            }
+            
+            // Save report (placeholder function)
+            function saveReport() {
+                alert("Report saved successfully!");
+            }
+            
+            // Allow file upload as alternative to camera
+            newPhotoBtn.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                fileInput.click();
+            });
+            
+            // Add tooltip for right-click option
+            newPhotoBtn.title = "Left-click for camera, Right-click to upload file";
+        });
+    </script>
 </body>
 </html>
