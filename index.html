@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plant Photo Analyzer</title>
+    <title>Plant Identifier Pro</title>
     <style>
         * {
             margin: 0;
@@ -23,7 +23,7 @@
         
         .container {
             width: 100%;
-            max-width: 800px;
+            max-width: 900px;
             background-color: white;
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
@@ -52,14 +52,14 @@
             padding: 30px;
         }
         
-        .photo-section {
+        .upload-section {
             display: flex;
             flex-direction: column;
             align-items: center;
             margin-bottom: 30px;
         }
         
-        .photo-container {
+        .upload-container {
             width: 100%;
             height: 300px;
             border: 2px dashed #2ecc71;
@@ -71,14 +71,21 @@
             overflow: hidden;
             background-color: #f8f9fa;
             position: relative;
+            transition: all 0.3s ease;
         }
         
-        .photo-placeholder {
+        .upload-container.drag-over {
+            border-color: #3498db;
+            background-color: #e8f4fc;
+        }
+        
+        .upload-placeholder {
             text-align: center;
             color: #7f8c8d;
+            padding: 20px;
         }
         
-        .photo-placeholder i {
+        .upload-icon {
             font-size: 60px;
             margin-bottom: 15px;
             color: #2ecc71;
@@ -90,11 +97,12 @@
             display: none;
         }
         
-        .buttons {
+        .upload-options {
             display: flex;
             gap: 15px;
             justify-content: center;
             flex-wrap: wrap;
+            margin-bottom: 20px;
         }
         
         .btn {
@@ -138,7 +146,31 @@
             box-shadow: none;
         }
         
-        .analysis-section {
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background-color: #ecf0f1;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .status-message {
+            text-align: center;
+            color: #7f8c8d;
+            margin: 15px 0;
+            font-style: italic;
+        }
+        
+        .results-section {
             background-color: #f8f9fa;
             border-radius: 15px;
             padding: 25px;
@@ -146,20 +178,20 @@
             display: none;
         }
         
-        .analysis-header {
+        .results-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
         }
         
-        .analysis-title {
+        .results-title {
             font-size: 1.5rem;
             color: #2c3e50;
             font-weight: 600;
         }
         
-        .analysis-content {
+        .results-content {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
@@ -195,28 +227,57 @@
             color: #2c3e50;
         }
         
-        .progress-container {
-            width: 100%;
+        .confidence-meter {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #ecf0f1;
+        }
+        
+        .confidence-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .confidence-bar {
             height: 8px;
             background-color: #ecf0f1;
             border-radius: 4px;
-            margin: 20px 0;
             overflow: hidden;
-            display: none;
         }
         
-        .progress-bar {
+        .confidence-fill {
             height: 100%;
             background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
             width: 0%;
-            transition: width 0.3s ease;
+            transition: width 1s ease;
         }
         
-        .status-message {
-            text-align: center;
-            color: #7f8c8d;
-            margin: 15px 0;
-            font-style: italic;
+        .alternative-results {
+            margin-top: 20px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .alternatives-title {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .alternative-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        
+        .alternative-item:last-child {
+            border-bottom: none;
         }
         
         .camera-modal {
@@ -262,8 +323,33 @@
             gap: 15px;
         }
         
+        .tips-section {
+            background-color: #e8f4fc;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .tips-title {
+            font-size: 1.1rem;
+            color: #2980b9;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .tips-list {
+            padding-left: 20px;
+            color: #34495e;
+        }
+        
+        .tips-list li {
+            margin-bottom: 8px;
+        }
+        
         @media (max-width: 768px) {
-            .analysis-content {
+            .results-content {
                 grid-template-columns: 1fr;
             }
             
@@ -271,7 +357,7 @@
                 font-size: 2rem;
             }
             
-            .buttons {
+            .upload-options {
                 flex-direction: column;
                 align-items: center;
             }
@@ -287,18 +373,31 @@
 <body>
     <div class="container">
         <header>
-            <h1>Plant Photo Analyzer</h1>
-            <p class="subtitle">Identify plants and check their health with AI technology</p>
+            <h1>Plant Identifier Pro</h1>
+            <p class="subtitle">Advanced AI plant identification with health analysis</p>
         </header>
         
         <div class="main-content">
-            <div class="photo-section">
-                <div class="photo-container">
-                    <div class="photo-placeholder">
-                        <i class="fas fa-leaf"></i>
-                        <p>No plant photo selected</p>
+            <div class="upload-section">
+                <div class="upload-container" id="uploadContainer">
+                    <div class="upload-placeholder" id="uploadPlaceholder">
+                        <i class="fas fa-leaf upload-icon"></i>
+                        <p>Drag & drop a plant photo here</p>
+                        <p class="subtitle">or click the buttons below</p>
                     </div>
                     <img id="photoPreview" class="photo-preview" src="" alt="Plant Photo Preview">
+                </div>
+                
+                <div class="upload-options">
+                    <button class="btn btn-primary" id="cameraBtn">
+                        <i class="fas fa-camera"></i> Take Photo
+                    </button>
+                    <button class="btn btn-primary" id="uploadBtn">
+                        <i class="fas fa-upload"></i> Upload Photo
+                    </button>
+                    <button class="btn btn-success" id="analyzeBtn" disabled>
+                        <i class="fas fa-search"></i> Identify Plant
+                    </button>
                 </div>
                 
                 <div class="progress-container" id="progressContainer">
@@ -306,66 +405,84 @@
                 </div>
                 
                 <div class="status-message" id="statusMessage"></div>
-                
-                <div class="buttons">
-                    <button class="btn btn-primary" id="newPhotoBtn">
-                        <i class="fas fa-camera"></i> New Photo
-                    </button>
-                    <button class="btn btn-success" id="analyzeBtn" disabled>
-                        <i class="fas fa-search"></i> Analyze Plant
-                    </button>
-                </div>
             </div>
             
-            <div class="analysis-section" id="analysisSection">
-                <div class="analysis-header">
-                    <h2 class="analysis-title">Analysis Results</h2>
-                    <div class="analysis-actions">
+            <div class="tips-section">
+                <h3 class="tips-title"><i class="fas fa-lightbulb"></i> Tips for Better Identification</h3>
+                <ul class="tips-list">
+                    <li>Take clear, well-lit photos of the plant</li>
+                    <li>Focus on leaves, flowers, or distinctive features</li>
+                    <li>Include multiple angles if possible</li>
+                    <li>Avoid blurry or dark images</li>
+                </ul>
+            </div>
+            
+            <div class="results-section" id="resultsSection">
+                <div class="results-header">
+                    <h2 class="results-title">Identification Results</h2>
+                    <div class="results-actions">
                         <button class="btn btn-primary" id="saveReportBtn">
                             <i class="fas fa-download"></i> Save Report
                         </button>
                     </div>
                 </div>
                 
-                <div class="analysis-content">
+                <div class="results-content">
                     <div class="plant-info">
                         <h3 class="info-title">Plant Information</h3>
                         <div class="info-item">
                             <span class="info-label">Species:</span>
-                            <span class="info-value" id="speciesValue">Monstera Deliciosa</span>
+                            <span class="info-value" id="speciesValue">-</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Common Name:</span>
-                            <span class="info-value" id="commonNameValue">Swiss Cheese Plant</span>
+                            <span class="info-value" id="commonNameValue">-</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Family:</span>
-                            <span class="info-value" id="familyValue">Araceae</span>
+                            <span class="info-value" id="familyValue">-</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Native Region:</span>
-                            <span class="info-value" id="regionValue">Central America</span>
+                            <span class="info-value" id="regionValue">-</span>
+                        </div>
+                        
+                        <div class="confidence-meter">
+                            <div class="confidence-label">
+                                <span>Identification Confidence:</span>
+                                <span id="confidenceValue">-</span>
+                            </div>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" id="confidenceFill"></div>
+                            </div>
                         </div>
                     </div>
                     
                     <div class="health-status">
-                        <h3 class="status-title">Health Status</h3>
+                        <h3 class="status-title">Health Assessment</h3>
                         <div class="status-item">
                             <span class="status-label">Overall Health:</span>
-                            <span class="status-value" id="healthValue">Good</span>
+                            <span class="status-value" id="healthValue">-</span>
                         </div>
                         <div class="status-item">
                             <span class="status-label">Water Needs:</span>
-                            <span class="status-value" id="waterValue">Moderate</span>
+                            <span class="status-value" id="waterValue">-</span>
                         </div>
                         <div class="status-item">
                             <span class="status-label">Light Requirements:</span>
-                            <span class="status-value" id="lightValue">Bright, indirect light</span>
+                            <span class="status-value" id="lightValue">-</span>
                         </div>
                         <div class="status-item">
                             <span class="status-label">Potential Issues:</span>
-                            <span class="status-value" id="issuesValue">None detected</span>
+                            <span class="status-value" id="issuesValue">-</span>
                         </div>
+                    </div>
+                </div>
+                
+                <div class="alternative-results">
+                    <h3 class="alternatives-title">Other Possible Matches</h3>
+                    <div id="alternativesList">
+                        <!-- Alternative results will be populated here -->
                     </div>
                 </div>
             </div>
@@ -396,11 +513,13 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // DOM Elements
-            const newPhotoBtn = document.getElementById('newPhotoBtn');
+            const uploadContainer = document.getElementById('uploadContainer');
+            const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+            const cameraBtn = document.getElementById('cameraBtn');
+            const uploadBtn = document.getElementById('uploadBtn');
             const analyzeBtn = document.getElementById('analyzeBtn');
             const photoPreview = document.getElementById('photoPreview');
-            const photoPlaceholder = document.querySelector('.photo-placeholder');
-            const analysisSection = document.getElementById('analysisSection');
+            const resultsSection = document.getElementById('resultsSection');
             const progressContainer = document.getElementById('progressContainer');
             const progressBar = document.getElementById('progressBar');
             const statusMessage = document.getElementById('statusMessage');
@@ -411,16 +530,49 @@
             const closeCameraBtn = document.getElementById('closeCameraBtn');
             const saveReportBtn = document.getElementById('saveReportBtn');
             
+            // Results elements
+            const speciesValue = document.getElementById('speciesValue');
+            const commonNameValue = document.getElementById('commonNameValue');
+            const familyValue = document.getElementById('familyValue');
+            const regionValue = document.getElementById('regionValue');
+            const healthValue = document.getElementById('healthValue');
+            const waterValue = document.getElementById('waterValue');
+            const lightValue = document.getElementById('lightValue');
+            const issuesValue = document.getElementById('issuesValue');
+            const confidenceValue = document.getElementById('confidenceValue');
+            const confidenceFill = document.getElementById('confidenceFill');
+            const alternativesList = document.getElementById('alternativesList');
+            
             let stream = null;
             let currentPhotoData = null;
             
             // Event Listeners
-            newPhotoBtn.addEventListener('click', openCameraModal);
-            analyzeBtn.addEventListener('click', analyzePlant);
+            cameraBtn.addEventListener('click', openCameraModal);
+            uploadBtn.addEventListener('click', () => fileInput.click());
+            analyzeBtn.addEventListener('click', identifyPlant);
             fileInput.addEventListener('change', handleFileUpload);
             captureBtn.addEventListener('click', capturePhoto);
             closeCameraBtn.addEventListener('click', closeCameraModal);
             saveReportBtn.addEventListener('click', saveReport);
+            
+            // Drag and drop functionality
+            uploadContainer.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadContainer.classList.add('drag-over');
+            });
+            
+            uploadContainer.addEventListener('dragleave', function() {
+                uploadContainer.classList.remove('drag-over');
+            });
+            
+            uploadContainer.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadContainer.classList.remove('drag-over');
+                
+                if (e.dataTransfer.files.length) {
+                    handleDroppedFile(e.dataTransfer.files[0]);
+                }
+            });
             
             // Open camera modal
             function openCameraModal() {
@@ -443,7 +595,6 @@
                     videoElement.srcObject = stream;
                 } catch (err) {
                     console.error("Error accessing camera: ", err);
-                    // Fallback to file upload if camera fails
                     alert("Could not access camera. Please upload a photo instead.");
                     fileInput.click();
                     closeCameraModal();
@@ -479,25 +630,38 @@
             function handleFileUpload(event) {
                 const file = event.target.files[0];
                 if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        currentPhotoData = e.target.result;
-                        displayPhoto(currentPhotoData);
-                        analyzeBtn.disabled = false;
-                    };
-                    reader.readAsDataURL(file);
+                    handleDroppedFile(file);
                 }
+            }
+            
+            // Handle dropped file
+            function handleDroppedFile(file) {
+                if (!file.type.match('image.*')) {
+                    alert('Please upload an image file.');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentPhotoData = e.target.result;
+                    displayPhoto(currentPhotoData);
+                    analyzeBtn.disabled = false;
+                };
+                reader.readAsDataURL(file);
             }
             
             // Display photo in preview
             function displayPhoto(dataUrl) {
-                photoPlaceholder.style.display = 'none';
+                uploadPlaceholder.style.display = 'none';
                 photoPreview.src = dataUrl;
                 photoPreview.style.display = 'block';
             }
             
-            // Simulate plant analysis (replaces the freezing process)
-            function analyzePlant() {
+            // Improved plant identification with multiple possible results
+            function identifyPlant() {
+                // Reset previous results
+                resultsSection.style.display = 'none';
+                
                 // Show progress and status
                 progressContainer.style.display = 'block';
                 statusMessage.textContent = "Processing image...";
@@ -507,33 +671,33 @@
                 simulateProgress(0);
                 
                 setTimeout(() => {
-                    simulateProgress(30);
-                    statusMessage.textContent = "Identifying plant species...";
+                    simulateProgress(25);
+                    statusMessage.textContent = "Extracting plant features...";
                 }, 800);
                 
                 setTimeout(() => {
-                    simulateProgress(60);
-                    statusMessage.textContent = "Analyzing plant health...";
+                    simulateProgress(50);
+                    statusMessage.textContent = "Comparing with plant database...";
                 }, 1600);
                 
                 setTimeout(() => {
-                    simulateProgress(90);
-                    statusMessage.textContent = "Generating report...";
+                    simulateProgress(75);
+                    statusMessage.textContent = "Analyzing plant health...";
                 }, 2400);
                 
                 setTimeout(() => {
                     simulateProgress(100);
-                    statusMessage.textContent = "Analysis complete!";
+                    statusMessage.textContent = "Identification complete!";
                     
                     // Show results after a short delay
                     setTimeout(() => {
-                        analysisSection.style.display = 'block';
+                        displayResults();
                         analyzeBtn.disabled = false;
                         
                         // Scroll to results
-                        analysisSection.scrollIntoView({ behavior: 'smooth' });
+                        resultsSection.scrollIntoView({ behavior: 'smooth' });
                     }, 500);
-                }, 3000);
+                }, 3200);
             }
             
             // Simulate progress bar animation
@@ -552,19 +716,188 @@
                 }, 10);
             }
             
+            // Display identification results
+            function displayResults() {
+                // Generate random plant identification (simulating AI)
+                const plantData = generatePlantIdentification();
+                
+                // Update main result
+                speciesValue.textContent = plantData.species;
+                commonNameValue.textContent = plantData.commonName;
+                familyValue.textContent = plantData.family;
+                regionValue.textContent = plantData.region;
+                
+                // Update health assessment
+                healthValue.textContent = plantData.health.overall;
+                waterValue.textContent = plantData.health.water;
+                lightValue.textContent = plantData.health.light;
+                issuesValue.textContent = plantData.health.issues;
+                
+                // Update confidence
+                const confidence = plantData.confidence;
+                confidenceValue.textContent = `${confidence}%`;
+                confidenceFill.style.width = `${confidence}%`;
+                
+                // Update alternative results
+                updateAlternativeResults(plantData.alternatives);
+                
+                // Show results section
+                resultsSection.style.display = 'block';
+            }
+            
+            // Generate realistic plant identification data
+            function generatePlantIdentification() {
+                // Common houseplants and outdoor plants database
+                const plants = [
+                    {
+                        species: "Monstera deliciosa",
+                        commonName: "Swiss Cheese Plant",
+                        family: "Araceae",
+                        region: "Central America",
+                        health: {
+                            overall: "Good",
+                            water: "Moderate",
+                            light: "Bright, indirect light",
+                            issues: "None detected"
+                        }
+                    },
+                    {
+                        species: "Sansevieria trifasciata",
+                        commonName: "Snake Plant",
+                        family: "Asparagaceae",
+                        region: "West Africa",
+                        health: {
+                            overall: "Excellent",
+                            water: "Low",
+                            light: "Low to bright indirect light",
+                            issues: "None detected"
+                        }
+                    },
+                    {
+                        species: "Epipremnum aureum",
+                        commonName: "Pothos",
+                        family: "Araceae",
+                        region: "French Polynesia",
+                        health: {
+                            overall: "Good",
+                            water: "Moderate",
+                            light: "Low to bright indirect light",
+                            issues: "Slight nutrient deficiency"
+                        }
+                    },
+                    {
+                        species: "Ficus lyrata",
+                        commonName: "Fiddle Leaf Fig",
+                        family: "Moraceae",
+                        region: "West Africa",
+                        health: {
+                            overall: "Fair",
+                            water: "Moderate",
+                            light: "Bright, indirect light",
+                            issues: "Possible overwatering"
+                        }
+                    },
+                    {
+                        species: "Zamioculcas zamiifolia",
+                        commonName: "ZZ Plant",
+                        family: "Araceae",
+                        region: "East Africa",
+                        health: {
+                            overall: "Excellent",
+                            water: "Low",
+                            light: "Low to bright indirect light",
+                            issues: "None detected"
+                        }
+                    },
+                    {
+                        species: "Spathiphyllum wallisii",
+                        commonName: "Peace Lily",
+                        family: "Araceae",
+                        region: "Central America",
+                        health: {
+                            overall: "Good",
+                            water: "High",
+                            light: "Low to medium indirect light",
+                            issues: "Slight wilting detected"
+                        }
+                    },
+                    {
+                        species: "Crassula ovata",
+                        commonName: "Jade Plant",
+                        family: "Crassulaceae",
+                        region: "South Africa",
+                        health: {
+                            overall: "Good",
+                            water: "Low",
+                            light: "Bright direct light",
+                            issues: "None detected"
+                        }
+                    },
+                    {
+                        species: "Chlorophytum comosum",
+                        commonName: "Spider Plant",
+                        family: "Asparagaceae",
+                        region: "Southern Africa",
+                        health: {
+                            overall: "Excellent",
+                            water: "Moderate",
+                            light: "Bright, indirect light",
+                            issues: "None detected"
+                        }
+                    }
+                ];
+                
+                // Randomly select a plant (simulating AI analysis)
+                const mainPlantIndex = Math.floor(Math.random() * plants.length);
+                const mainPlant = {...plants[mainPlantIndex]};
+                
+                // Generate confidence level (70-95%)
+                mainPlant.confidence = Math.floor(Math.random() * 26) + 70;
+                
+                // Generate alternative results
+                mainPlant.alternatives = [];
+                const usedIndices = [mainPlantIndex];
+                
+                for (let i = 0; i < 3; i++) {
+                    let altIndex;
+                    do {
+                        altIndex = Math.floor(Math.random() * plants.length);
+                    } while (usedIndices.includes(altIndex));
+                    
+                    usedIndices.push(altIndex);
+                    const altPlant = {...plants[altIndex]};
+                    altPlant.confidence = Math.floor(Math.random() * 30) + 50;
+                    if (altPlant.confidence >= mainPlant.confidence) {
+                        altPlant.confidence = mainPlant.confidence - 5;
+                    }
+                    mainPlant.alternatives.push(altPlant);
+                }
+                
+                // Sort alternatives by confidence
+                mainPlant.alternatives.sort((a, b) => b.confidence - a.confidence);
+                
+                return mainPlant;
+            }
+            
+            // Update alternative results section
+            function updateAlternativeResults(alternatives) {
+                alternativesList.innerHTML = '';
+                
+                alternatives.forEach(plant => {
+                    const altElement = document.createElement('div');
+                    altElement.className = 'alternative-item';
+                    altElement.innerHTML = `
+                        <span>${plant.commonName} (${plant.species})</span>
+                        <span>${plant.confidence}%</span>
+                    `;
+                    alternativesList.appendChild(altElement);
+                });
+            }
+            
             // Save report (placeholder function)
             function saveReport() {
                 alert("Report saved successfully!");
             }
-            
-            // Allow file upload as alternative to camera
-            newPhotoBtn.addEventListener('contextmenu', function(e) {
-                e.preventDefault();
-                fileInput.click();
-            });
-            
-            // Add tooltip for right-click option
-            newPhotoBtn.title = "Left-click for camera, Right-click to upload file";
         });
     </script>
 </body>
